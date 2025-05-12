@@ -25,15 +25,19 @@ type Post struct {
 var posts []Post = []Post{}
 
 func main() {
+	/*-----------------Adding data to the posts-----------*/
 	posts = append(posts,Post{Title:"post 1",Body:"This is my first post",Author:&User{FullName:"sharukh khan",UserName:"sharukh010",Email:"sharukh010@gmail.com"}})
 
 	posts = append(posts,Post{Title:"post 2",Body:"This is my second post",Author:&User{FullName:"sharukh khan",UserName:"sharukh010",Email:"sharukh010@gmail.com"}})
 
+	/*--------------------------Routes--------------------*/
 	router := mux.NewRouter()
 
 	router.HandleFunc("/posts",getPosts).Methods("GET")
+	router.HandleFunc("/posts",addPost).Methods("POST")
 	router.HandleFunc("/posts/{id}",getPost).Methods("GET")
 
+	/*-----------------------Starting the server-------------*/
 	fmt.Println("Server starting on post 8081")
 
 	if err := http.ListenAndServe(":8081",router);err!=nil{
@@ -43,6 +47,18 @@ func main() {
 
 func getPosts(w http.ResponseWriter,r *http.Request){
 	w.Header().Set("Content-Type","Application/json")
+
+	json.NewEncoder(w).Encode(posts)
+}
+
+func addPost(w http.ResponseWriter,r *http.Request){
+	w.Header().Set("Content-Type","Application/json")
+
+	var newPost Post 
+
+	json.NewDecoder(r).Decode(&newPost)
+
+	posts = append(posts,newPost)
 
 	json.NewEncoder(w).Encode(posts)
 }
