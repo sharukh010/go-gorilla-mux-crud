@@ -161,6 +161,7 @@ func deletePost(w http.ResponseWriter,r *http.Request){
 	if id>= len(posts){
 		w.WriteHeader(404)
 		w.Write([]byte("No data founded with specified Id"))
+		return
 	}
 	posts = append(posts[:id],posts[id+1:]...)
 	w.WriteHeader(200)
