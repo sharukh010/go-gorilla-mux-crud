@@ -38,6 +38,7 @@ func main() {
 	router.HandleFunc("/posts/{id}",getPost).Methods("GET")
 	router.HandleFunc("/posts/{id}",updatePost).Methods("PUT")
 	router.HandleFunc("/posts/{id}",patchPost).Methods("PATCH")
+	router.HandleFunc("/posts/{id}",deletePost).Methods("DELETE")
 
 	/*-----------------------Starting the server-------------*/
 	fmt.Println("Server starting on post 8081")
@@ -58,7 +59,7 @@ func addPost(w http.ResponseWriter,r *http.Request){
 
 	var newPost Post 
 
-	json.NewDecoder(r).Decode(&newPost)
+	json.NewDecoder(r.Body).Decode(&newPost)
 
 	posts = append(posts,newPost)
 
@@ -66,6 +67,7 @@ func addPost(w http.ResponseWriter,r *http.Request){
 }
 
 func getPost(w http.ResponseWriter,r *http.Request){
+	w.Header().Set("Content-Type","Application/json")
 	params := mux.Vars(r)
 
 	id,err := strconv.Atoi(params["id"])
@@ -141,5 +143,25 @@ func patchPost(w http.ResponseWriter,r *http.Request){
 
 	json.NewEncoder(w).Encode(patchdata)
 
+}
 
+func deletePost(w http.ResponseWriter,r *http.Request){
+	w.Header().Set("Content-Type","Application/json")
+
+	var idParam string = mux.Vars(r)["id"]
+
+	id,err := strconv.Atoi(idParam)
+
+	if err != nil {
+		w.WriteHeader(400)
+		w.Write([]byte("ID could not converted to Integer"))
+		return 
+	}
+
+	if id>= len(posts){
+		w.WriteHeader(404)
+		w.Write([]byte("No data founded with specified Id"))
+	}
+	posts = append(posts[:id],posts[id+1:]...)
+	w.WriteHeader(200)
 }
