@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"strconv"
 
 	"github.com/gorilla/mux"
 )
@@ -31,9 +32,10 @@ func main() {
 	router := mux.NewRouter()
 
 	router.HandleFunc("/posts",getPosts).Methods("GET")
+	router.HandleFunc("/posts/{id}",getPost).Methods("GET")
 
 	fmt.Println("Server starting on post 8081")
-	
+
 	if err := http.ListenAndServe(":8081",router);err!=nil{
 		log.Fatalf("Error: %s",err.Error())
 	}
@@ -43,4 +45,26 @@ func getPosts(w http.ResponseWriter,r *http.Request){
 	w.Header().Set("Content-Type","Application/json")
 
 	json.NewEncoder(w).Encode(posts)
+}
+
+func getPost(w http.ResponseWriter,r *http.Request){
+	params := mux.Vars(r)
+
+	id,err := strconv.Atoi(params["id"])
+
+	if err != nil {
+		w.WriteHeader(400)
+		w.Write([]byte("ID could not be converted to integer"))
+		return 
+	}
+
+	if id >= len(posts) {
+		w.WriteHeader(404)
+		w.Write([]byte("No data found with specified ID"))
+		return 
+	}
+
+	post := posts[id]
+
+	json.NewEncoder(w).Encode(post)
 }
